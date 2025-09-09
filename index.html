@@ -1,9 +1,124 @@
-[
-  {
-    "nome": "JOÃO DA SILVA",
-    "telefone": "11999999999",
-    "email": "JOAO@EMAIL.COM",
-    "cidade": "SÃO PAULO",
-    "linkWhats": "https://wa.me/11999999999"
-  }
-]
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>CRM - Contatos</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/write-excel-file@1.x/bundle/write-excel-file.min.js"></script>
+
+  <style>
+    /* ... o mesmo CSS anterior (omitido aqui para foco no JS) ... */
+  </style>
+</head>
+<body>
+
+  <h1>📇 Cadastro de Contato</h1>
+
+  <form id="cadastroForm">
+    <input type="text" id="nome" placeholder="Nome" required />
+    <input type="text" id="telefone" placeholder="Telefone (ex: 11999999999)" required />
+    <input type="email" id="email" placeholder="Email" required />
+    <input type="text" id="cidade" placeholder="Cidade" required />
+    <button type="submit">Adicionar Contato</button>
+    <button type="button" id="exportarJson">Exportar JSON</button>
+    <button type="button" id="exportarExcel">Exportar Excel</button>
+  </form>
+
+  <div id="cardsContainer"></div>
+
+  <script>
+    const contatos = [];
+    const form = document.getElementById('cadastroForm');
+    const container = document.getElementById('cardsContainer');
+    const exportarJsonBtn = document.getElementById('exportarJson');
+    const exportarExcelBtn = document.getElementById('exportarExcel');
+
+    // Função para criar cartão visual
+    function criarCartao(contato) {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <h2>${contato.nome}</h2>
+        <p>📞 <a href="${contato.linkWhats}" target="_blank">WhatsApp: ${contato.telefone}</a></p>
+        <p>✉️ Email: ${contato.email}</p>
+        <p>🏙️ Cidade: ${contato.cidade}</p>
+      `;
+      container.appendChild(card);
+    }
+
+    // Carregar contatos do JSON hospedado no GitHub
+    async function fetchContatosSalvos() {
+      try {
+        const response = await fetch('contatos.json');
+        if (!response.ok) throw new Error('Arquivo não encontrado ou inacessível');
+        const data = await response.json();
+
+        data.forEach(contato => {
+          contatos.push(contato);
+          criarCartao(contato);
+        });
+      } catch (err) {
+        console.warn('Não foi possível carregar os contatos salvos:', err.message);
+      }
+    }
+
+    // Evento de envio de novo contato
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+
+      const nome = document.getElementById('nome').value.trim().toUpperCase();
+      const telefone = document.getElementById('telefone').value.trim();
+      const email = document.getElementById('email').value.trim().toUpperCase();
+      const cidade = document.getElementById('cidade').value.trim().toUpperCase();
+      const linkWhats = `https://wa.me/${telefone.replace(/\D/g, '')}`;
+
+      const contato = { nome, telefone, email, cidade, linkWhats };
+      contatos.push(contato);
+      criarCartao(contato);
+
+      form.reset();
+    });
+
+    // Exportar para JSON
+    exportarJsonBtn.addEventListener('click', () => {
+      if (contatos.length === 0) {
+        alert('Nenhum contato para exportar.');
+        return;
+      }
+
+      const blob = new Blob([JSON.stringify(contatos, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'contatos.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    // Exportar para Excel
+    exportarExcelBtn.addEventListener('click', async () => {
+      if (!contatos.length) {
+        alert('Nenhum contato para exportar.');
+        return;
+      }
+
+      const schema = [
+        { column: 'Nome', type: String, value: c => c.nome },
+        { column: 'Telefone', type: String, value: c => c.telefone },
+        { column: 'Email', type: String, value: c => c.email },
+        { column: 'Cidade', type: String, value: c => c.cidade },
+        { column: 'Link WhatsApp', type: String, value: c => c.linkWhats }
+      ];
+
+      await writeXlsxFile(contatos, {
+        schema,
+        fileName: 'contatos.xlsx'
+      });
+    });
+
+    // Carrega os contatos do JSON ao iniciar a página
+    window.onload = fetchContatosSalvos;
+  </script>
+</body>
+</html>
