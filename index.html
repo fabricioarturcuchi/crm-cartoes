@@ -1,131 +1,170 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>CRM - Contatos</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
   <script src="https://unpkg.com/write-excel-file@1.x/bundle/write-excel-file.min.js"></script>
 
   <style>
-    :root {
-      --bg: #f3f4f6;
-      --primary: #2563eb;
-      --accent: #1e40af;
-      --card-bg: #e0f2fe;
-      --border: #d1d5db;
-      --text: #111827;
-      --gray: #4b5563;
-    }
-
+    /* Reset básico */
     * {
       box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+      font-family: 'Inter', sans-serif;
     }
 
     body {
-      background-color: var(--bg);
-      font-family: 'Inter', sans-serif;
-      color: var(--text);
-      padding: 30px;
+      background: #f0f4f8;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
     }
 
     h1 {
+      font-size: 2.4rem;
+      color: #1e40af; /* Azul escuro */
+      margin-bottom: 30px;
       text-align: center;
-      font-size: 2rem;
-      margin-bottom: 20px;
-      color: var(--primary);
     }
 
-    form {
-      background-color: #ffffff;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-      margin: 0 auto 40px auto;
-      max-width: 500px;
-    }
-
-    form input {
+    form#cadastroForm {
+      background: white;
+      padding: 25px 30px;
+      border-radius: 10px;
+      box-shadow: 0 8px 20px rgba(30, 64, 175, 0.15);
       width: 100%;
-      padding: 10px;
-      margin-bottom: 15px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font-size: 14px;
+      max-width: 500px;
+      margin-bottom: 40px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+    }
+
+    form#cadastroForm input {
+      flex: 1 1 45%;
+      padding: 12px 15px;
+      font-size: 1rem;
+      border: 2px solid #cbd5e1; /* cinza claro */
+      border-radius: 6px;
       text-transform: uppercase;
+      transition: border-color 0.25s ease;
     }
 
-    form button {
-      padding: 10px 16px;
-      background-color: var(--primary);
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
+    form#cadastroForm input:focus {
+      border-color: #2563eb; /* azul vibrante */
+      outline: none;
+    }
+
+    form#cadastroForm input#telefone {
+      flex-basis: 100%; /* telefone ocupa linha inteira para facilitar */
+    }
+
+    form#cadastroForm button {
+      padding: 12px 20px;
       font-weight: 600;
-      margin-right: 10px;
-      margin-top: 5px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      flex: 1 1 30%;
+      min-width: 120px;
+      color: white;
+      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
     }
 
-    form button:hover {
-      background-color: var(--accent);
+    form#cadastroForm button[type="submit"] {
+      background-color: #2563eb;
+    }
+    form#cadastroForm button[type="submit"]:hover {
+      background-color: #1d4ed8;
+    }
+
+    form#cadastroForm button#exportarJson {
+      background-color: #16a34a; /* verde */
+    }
+    form#cadastroForm button#exportarJson:hover {
+      background-color: #15803d;
+    }
+
+    form#cadastroForm button#exportarExcel {
+      background-color: #ea580c; /* laranja */
+    }
+    form#cadastroForm button#exportarExcel:hover {
+      background-color: #c2410c;
     }
 
     #cardsContainer {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 20px;
-      max-width: 1200px;
-      margin: 0 auto;
+      width: 100%;
+      max-width: 960px;
+      margin-bottom: 40px;
     }
 
     .card {
-      background-color: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-      transition: transform 0.2s ease;
-      text-transform: uppercase;
+      background: #2563eb; /* azul vibrante */
+      color: white;
+      padding: 20px 25px;
+      border-radius: 15px;
+      box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      cursor: default;
     }
 
     .card:hover {
-      transform: translateY(-4px);
+      transform: translateY(-8px);
+      box-shadow: 0 15px 35px rgba(37, 99, 235, 0.5);
     }
 
     .card h2 {
-      font-size: 1.4rem;
-      margin-bottom: 10px;
-      color: var(--accent);
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin: 0;
+      text-transform: uppercase;
     }
 
     .card p {
-      font-size: 14px;
-      color: var(--gray);
-      margin: 6px 0;
+      margin: 0;
+      font-size: 1rem;
+      line-height: 1.3;
     }
 
     .card a {
-      color: #047857;
+      color: #dbeafe; /* azul claro */
       text-decoration: none;
       font-weight: 600;
     }
 
-    @media (max-width: 1024px) {
+    .card a:hover {
+      text-decoration: underline;
+    }
+
+    /* Responsividade para telas menores */
+    @media (max-width: 600px) {
+      form#cadastroForm input {
+        flex-basis: 100%;
+      }
+      form#cadastroForm button {
+        flex-basis: 100%;
+      }
       #cardsContainer {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: 1fr 1fr;
       }
     }
 
-    @media (max-width: 700px) {
+    @media (max-width: 400px) {
       #cardsContainer {
         grid-template-columns: 1fr;
-      }
-
-      form {
-        padding: 15px;
       }
     }
   </style>
@@ -135,10 +174,10 @@
   <h1>📇 Cadastro de Contato</h1>
 
   <form id="cadastroForm">
-    <input type="text" id="nome" placeholder="Nome" required>
-    <input type="text" id="telefone" placeholder="Telefone (ex: 11999999999)" required>
-    <input type="email" id="email" placeholder="Email" required>
-    <input type="text" id="cidade" placeholder="Cidade" required>
+    <input type="text" id="nome" placeholder="Nome" required />
+    <input type="text" id="telefone" placeholder="Telefone (ex: 11999999999)" required />
+    <input type="email" id="email" placeholder="Email" required />
+    <input type="text" id="cidade" placeholder="Cidade" required />
     <button type="submit">Adicionar Contato</button>
     <button type="button" id="exportarJson">Exportar JSON</button>
     <button type="button" id="exportarExcel">Exportar Excel</button>
@@ -148,12 +187,41 @@
 
   <script>
     const contatos = [];
-
     const form = document.getElementById('cadastroForm');
     const container = document.getElementById('cardsContainer');
     const exportarJsonBtn = document.getElementById('exportarJson');
     const exportarExcelBtn = document.getElementById('exportarExcel');
 
+    // Função para criar cartão visual
+    function criarCartao(contato) {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <h2>${contato.nome}</h2>
+        <p>📞 <a href="${contato.linkWhats}" target="_blank" rel="noopener noreferrer">WhatsApp: ${contato.telefone}</a></p>
+        <p>✉️ Email: ${contato.email}</p>
+        <p>🏙️ Cidade: ${contato.cidade}</p>
+      `;
+      container.appendChild(card);
+    }
+
+    // Carregar contatos do JSON hospedado no GitHub
+    async function fetchContatosSalvos() {
+      try {
+        const response = await fetch('contatos.json');
+        if (!response.ok) throw new Error('Arquivo não encontrado ou inacessível');
+        const data = await response.json();
+
+        data.forEach(contato => {
+          contatos.push(contato);
+          criarCartao(contato);
+        });
+      } catch (err) {
+        console.warn('Não foi possível carregar os contatos salvos:', err.message);
+      }
+    }
+
+    // Evento de envio de novo contato
     form.addEventListener('submit', e => {
       e.preventDefault();
 
@@ -163,32 +231,17 @@
       const cidade = document.getElementById('cidade').value.trim().toUpperCase();
       const linkWhats = `https://wa.me/${telefone.replace(/\D/g, '')}`;
 
-      const contato = {
-        nome,
-        telefone,
-        email,
-        cidade,
-        linkWhats
-      };
-
+      const contato = { nome, telefone, email, cidade, linkWhats };
       contatos.push(contato);
-
-      const card = document.createElement('div');
-      card.className = 'card';
-      card.innerHTML = `
-        <h2>${nome}</h2>
-        <p>📞 <a href="${linkWhats}" target="_blank">WhatsApp: ${telefone}</a></p>
-        <p>✉️ Email: ${email}</p>
-        <p>🏙️ Cidade: ${cidade}</p>
-      `;
-      container.appendChild(card);
+      criarCartao(contato);
 
       form.reset();
     });
 
+    // Exportar para JSON
     exportarJsonBtn.addEventListener('click', () => {
       if (contatos.length === 0) {
-        alert("Nenhum contato para exportar.");
+        alert('Nenhum contato para exportar.');
         return;
       }
 
@@ -201,6 +254,7 @@
       URL.revokeObjectURL(url);
     });
 
+    // Exportar para Excel
     exportarExcelBtn.addEventListener('click', async () => {
       if (!contatos.length) {
         alert('Nenhum contato para exportar.');
@@ -208,11 +262,11 @@
       }
 
       const schema = [
-        { column: 'Nome', type: String, value: contato => contato.nome },
-        { column: 'Telefone', type: String, value: contato => contato.telefone },
-        { column: 'Email', type: String, value: contato => contato.email },
-        { column: 'Cidade', type: String, value: contato => contato.cidade },
-        { column: 'Link WhatsApp', type: String, value: contato => contato.linkWhats }
+        { column: 'Nome', type: String, value: c => c.nome },
+        { column: 'Telefone', type: String, value: c => c.telefone },
+        { column: 'Email', type: String, value: c => c.email },
+        { column: 'Cidade', type: String, value: c => c.cidade },
+        { column: 'Link WhatsApp', type: String, value: c => c.linkWhats }
       ];
 
       await writeXlsxFile(contatos, {
@@ -220,7 +274,9 @@
         fileName: 'contatos.xlsx'
       });
     });
-  </script>
 
+    // Carrega os contatos do JSON ao iniciar a página
+    window.onload = fetchContatosSalvos;
+  </script>
 </body>
 </html>
